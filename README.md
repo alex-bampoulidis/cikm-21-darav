@@ -1,7 +1,4 @@
-# anonymisation_de-anonymisation_risk_analysis
-
-This project regards the application that is being developed in the context of T4.3
-The objectives of the application is to apply de-anonymisation attacks and getting insight into the data, as well as to apply different anonymisation approaches.
+This project regards the application that is being presented in the demo paper "DaRAV: A Tool for Visualizing De-Anonymization Risks" submitted to CIKM 2021.
 
 ## How to run the application
 - Run: ```docker-compose build``` in order for all the images to be build locally
