@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Location test</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+   
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+<script type="text/javascript">
+
+var host = "http://localhost:";
+var port = "4201";
+
+function test() {
+	var url = host + port + "/locationtest";
+
+	var params = "";
+	
+	var http = new XMLHttpRequest();
+	
+	http.open("GET", url, true);
+
+	//Send the proper header information along with the request
+	http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+	http.onreadystatechange = function() {//Call a function when the state changes.
+		if (http.readyState == 4 && http.status == 200) {
+			var resp = JSON.parse(http.responseText);
+			setOutput(resp);
+		}
+	}
+	
+	http.send(params);
+}
+
+function setOutput(resp) {
+	var lats = [];
+	var lons = [];
+	var risks = [];
+	var colors = [];
+
+	var hits = resp.hits.hits;
+	
+	for (var i = 0; i < hits.length; i++) {
+		var source = hits[i]._source;
+		
+		lats[i] = source.lat;
+		lons[i] = source.lon;
+		risks[i] = source.risk;
+		colors[i] = source.color;
+	}
+	
+	var sumLats = 0;
+	var sumLons = 0;
+	
+	for (var i = 0; i < lats.length; i++) {
+		sumLats += parseFloat(lats[i]);
+		sumLons += parseFloat(lons[i]);
+	}
+	
+	var avgLat = sumLats / lats.length;
+	var avgLon = sumLons / lons.length;
+
+	var mymap = L.map('mapid').setView([avgLat, avgLon], 16);
+	
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		maxZoom: 26,
+		id: 'mapbox/streets-v11',
+		tileSize: 512,
+		zoomOffset: -1,
+		accessToken: 'pk.eyJ1IjoiYWJhbXBvdWwiLCJhIjoiY2tuZzVlaXplMWRhejJxb2F2bzJtbG03dSJ9.zh_C33Ji_gvx7Svb7b7Zjg'
+	}).addTo(mymap);
+	
+	for (var i = 0; i < lats.length; i++) {
+		var circle = L.circle([lats[i], lons[i]], {
+			color: colors[i],
+			fillColor: colors[i],
+			fillOpacity: 0.5,
+			radius: 5
+		}).bindPopup(String("risk:" + risks[i] + "%")).addTo(mymap);
+	}
+}
+
+</script>
+</head>
+
+<body onload="test()">
+	 <div id="mapid" style="height: 800px;">
+		
+	 </div>
+</body>
+
+</html>
+

@@ -1,0 +1,11 @@
+1. When uploading data, the option "Textual" should be available in the "Data Type" combo box.
+
+2. When a user wants to start a risk analysis on location data, they need to provide the following column types (in parenthesis how they should be written on the risk_analysis_info):
+		- userID column ("userid")
+		- text column ("textcolumn")
+
+   no parameters are needed to be specified, but create an empty "parameters" like in the other cases, just to (possibly) not crash the privacy-backend
+		
+3. The visualisation is a heatmap and a demo is located at localhost:4201/textual_reviews.html
+   In the demo, the page takes a sample response from an ES search query (like in the runtime environment).
+   Careful: The response might be more than 10.000 entries (max allowed by ES), so this needs to be handled.

@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Textual test</title>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+
+var host = "http://localhost:";
+var port = "4201";
+
+function test() {
+	var url = host + port + "/textualqueriestest";
+
+	var params = "";
+	
+	var http = new XMLHttpRequest();
+	
+	http.open("GET", url, true);
+
+	//Send the proper header information along with the request
+	http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+	http.onreadystatechange = function() {//Call a function when the state changes.
+		if (http.readyState == 4 && http.status == 200) {
+			var resp = JSON.parse(http.responseText);
+			setOutput(resp);
+		}
+	}
+	
+	http.send(params);
+}
+
+function setOutput(resp) {
+	var div = document.createElement('div');
+	div.id = "myDiv";		
+	document.body.appendChild(div);
+	
+	var colorscaleValue = [
+  [0, '#FF0000'],
+  [0.5, '#FFFF00'],
+  [1, '#7CFC00']
+];
+	
+	var data = [
+  {
+    z: resp.z,
+    x: resp.x,
+    y: resp.y,
+    type: 'heatmap',
+    hoverongaps: false,
+	colorscale: colorscaleValue,
+	opacity: 0.5
+  }
+];
+
+var layout = {
+  xaxis: {
+    showticklabels: false
+  },
+  yaxis: {
+	showticklabels: false
+  }
+};
+
+Plotly.newPlot('myDiv', data, layout);
+}
+
+</script>
+</head>
+
+<body onload="test()">
+
+</body>
+
+</html>
+

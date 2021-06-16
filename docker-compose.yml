@@ -1,0 +1,110 @@
+version: '3.2'
+
+services:
+  elasticsearch:
+    build:
+      context: elk/elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elk/elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - type: bind
+        source: ./elk/elasticsearch/data
+        target: /usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ELASTIC_PASSWORD: changeme
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node  
+    networks:
+      - elk
+
+  logstash:
+    build:
+      context: elk/logstash/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elk/logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./elk/logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+      - ./elk/logstash/user_datasets:/usr/share/logstash/user_datasets #
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+      - "8084:8084" #
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: elk/kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elk/kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  visual_analytics:
+    build:
+      context: visual_analytics/ 
+    ports:
+      - "80:80"  
+    networks:
+      - elk
+
+  datatransfer_server:
+    build:
+      context: datatransfer_server/ 
+    ports:
+      - "4560:4560"  
+    volumes:
+      - ./user_datasets:/usr/src/app/user_datasets
+    links:
+      - elasticsearch
+    networks:
+      - elk
+    
+  privacy_backend:
+    build:
+      context: privacy-backend/ 
+    ports:
+      - "4201:4201"  
+    volumes:
+      - ./user_datasets:/user_datasets
+    links:
+      - elasticsearch
+    networks:
+      - elk
+
+networks:
+  elk:
+    driver: bridge
+
+

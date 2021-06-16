@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>L-diversity test</title>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+
+var host = "http://localhost:";
+var port = "4201";
+
+function test() {
+	var url = host + port + "/ldiversitytest";
+
+	var params = "";
+	
+	var http = new XMLHttpRequest();
+	
+	http.open("GET", url, true);
+
+	//Send the proper header information along with the request
+	http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+	http.onreadystatechange = function() {//Call a function when the state changes.
+		if (http.readyState == 4 && http.status == 200) {
+			var resp = JSON.parse(http.responseText);
+			setOutput(resp);
+		}
+	}
+	
+	http.send(params);
+}
+
+function setOutput(resp) {
+	var output = document.getElementById('output');
+	
+	var hits = resp.hits.hits;
+	
+	for (var i = 0; i < hits.length; i++) {
+		var source = hits[i]._source;
+		
+		var sensitiveattribute = Object.keys(source)[0] + "";
+		
+		var array = source[sensitiveattribute];
+		
+		var h1 = document.createElement('h1');
+		h1.innerHTML = sensitiveattribute;
+		h1.style = "text-align:center";
+		document.body.appendChild(h1);
+		
+		var div = document.createElement('div');
+		div.id = sensitiveattribute;		
+		document.body.appendChild(div);
+		
+		var xaxiss = [];
+		var yaxiss = [];
+		var texts = [];
+	
+		for (var j = 0; j < array.length; j++) {
+			xaxiss[j] = array[j].QIs;
+			yaxiss[j] = array[j].risk;
+			texts[j] = array[j].combination;
+		}
+		
+		Plotly.newPlot(div, [{
+				x: xaxiss,
+				y: yaxiss,
+				type: 'scatter',
+				mode: 'markers',
+				text: texts
+			}],
+			{
+				title: {
+					text:'Plot Title',
+					font: {
+						family: 'Courier New, monospace',
+						size: 24
+					},
+					xref: 'paper',
+					x: 0.05
+				},
+				margin: { t: 0 },
+				hovermode: 'closest',
+				xaxis: {
+					title: 'QIs',
+					titlefont: {
+						family: 'Arial, sans-serif',
+						size: 18,
+						color: 'grey'
+					},
+					showticklabels: true,
+					tickangle: 'auto',
+					tickfont: {
+						family: 'Old Standard TT, serif',
+						size: 14,
+					color: 'black'
+					},
+					exponentformat: 'e',
+					showexponent: 'all'
+				},
+				yaxis: {
+					title: 'Probability of De-Anonymisation (%)',
+					titlefont: {
+						family: 'Arial, sans-serif',
+						size: 18,
+						color: 'grey'
+					},
+					showticklabels: true,
+					tickangle: 'auto',
+					tickfont: {
+						family: 'Old Standard TT, serif',
+						size: 14,
+						color: 'black'
+					},
+					exponentformat: 'e',
+					showexponent: 'all'
+				}
+			} 
+		);
+	}
+}
+
+</script>
+</head>
+
+<body onload="test()">
+
+</body>
+
+</html>
+
