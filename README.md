@@ -1,4 +1,5 @@
 This project regards the application that is being presented in the demo paper "DaRAV: A Tool for Visualizing De-Anonymization Risks" submitted to CIKM 2021.
+A demo may be found at http://139.91.189.216
 
 ## How to run the application
 - Run: ```docker-compose build``` in order for all the images to be build locally
